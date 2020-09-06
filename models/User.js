@@ -57,6 +57,19 @@ userSchema.pre('save', function (next) {
   }
 });
 
+// custom methods
+userSchema.methods.comparePassword = function (plainPassword, cb) {
+  // plain password : 내가 입력한 패스워드
+  // 암호화된 비밀번호와 체크를 해야함
+  // 암호된 패스워드를 복호화 할수 없기때문에 plain password 를 암호화해서 비교한다
+  bcrypt.compare(plainPassword, this.password, function (err, isMatch) {
+    if (err) {
+      return cb(err); // callback 으로 에러를 넘겨줌
+    }
+    cb(null, isMatch); // isMatch type is boolean
+  });
+};
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = { User };
