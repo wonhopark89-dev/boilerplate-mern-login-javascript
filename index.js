@@ -3,7 +3,7 @@ const app = express();
 const port = 3000;
 const bodyParser = require('body-parser');
 const { User } = require('./models/User');
-
+const config = require('./config/key');
 //application/x-www-form-urlencode 로 된 데이터를 분석해서 가져올 수 있음
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -13,15 +13,12 @@ app.use(bodyParser.json());
 //mongodb+srv://wonhopark89:<password>@boilerplate-react-node.tbh99.mongodb.net/<dbname>?retryWrites=true&w=majority
 const mongoose = require('mongoose');
 mongoose
-  .connect(
-    'mongodb+srv://wonhopark89:dnjsgh1234!@boilerplate-react-node.tbh99.mongodb.net/<dbname>?retryWrites=true&w=majority',
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex: true,
-      useFindAndModify: false,
-    }
-  )
+  .connect(config.mongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+  })
   .then(() => console.log('MongoDB Connected...'))
   .catch((err) => console.log(err));
 
