@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const saleRounds = 10;
+const jwt = require('jsonwebtoken');
 
 const userSchema = mongoose.Schema({
   name: {
@@ -67,6 +68,20 @@ userSchema.methods.comparePassword = function (plainPassword, cb) {
       return cb(err); // callback 으로 에러를 넘겨줌
     }
     cb(null, isMatch); // isMatch type is boolean
+  });
+};
+
+userSchema.methods.generateToken = function (cb) {
+  var user = this;
+  // jsonwebtoken 을 이용해서 토큰생성
+  // sign 함수는 plain object 를 기대하기 떄문에 hexString 으로 넘겨준다?
+  var token = jwt.sign(user._id.toHexString(), 'mySecret'); // 토큰과 함께 생성하는 값도 기억해야한다 !
+  user.token = token;
+  user.save(function (err, user) {
+    if (err) {
+      return cb(err);
+    }
+    cb(null, user); // argu : err, info
   });
 };
 

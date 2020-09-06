@@ -2,13 +2,15 @@ const express = require('express');
 const app = express();
 const port = 3000;
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const { User } = require('./models/User');
 const config = require('./config/key');
+
 //application/x-www-form-urlencode 로 된 데이터를 분석해서 가져올 수 있음
 app.use(bodyParser.urlencoded({ extended: true }));
-
 //application/json
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 //mongodb+srv://wonhopark89:<password>@boilerplate-react-node.tbh99.mongodb.net/<dbname>?retryWrites=true&w=majority
 const mongoose = require('mongoose');
@@ -40,8 +42,8 @@ app.post('/register', (req, res) => {
 
 app.post('/login', (req, res) => {
   // 요청한 이메일이 데이터베이스에 있는지 찬는다
-  User.findOne({ email: req.body.email }, (err, userInfo) => {
-    if (!userInfo) {
+  User.findOne({ email: req.body.email }, (err, user) => {
+    if (!user) {
       return res.json({
         loginSuccess: false,
         message: '제공된 이메일에 해당하는 유저가 없습니다.',
@@ -57,11 +59,19 @@ app.post('/login', (req, res) => {
         });
       }
       // 비밀번호까지 맞다면 토큰을 생성하기
-      user.generateToken((err, user) => {});
+      user.generateToken((err, user) => {
+        if (err) {
+          return res.status(400).send(err);
+        }
+        // 토큰을 저장한다. 어디에 ? 쿠키, 로컬스토리지 등
+        // 이름이 x_auth 인 쿠키에 저장함
+        res.cookie('x_auth', user.token).status(200).json({
+          loginSuccess: true,
+          userId: user._id,
+        });
+      });
     });
   });
-
-  // 비밀번호까지 맞다면 토큰을 생성하기
 });
 
 app.listen(port, () => {
