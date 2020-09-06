@@ -3,6 +3,7 @@ const app = express();
 const port = 3000;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const { auth } = require('./middleware/auth');
 const { User } = require('./models/User');
 const config = require('./config/key');
 
@@ -28,7 +29,7 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.post('/register', (req, res) => {
+app.post('/api/users/register', (req, res) => {
   // 회원가입할때 필요한 정보를 client 에서 가져온다
   // 그것들은 데이터베이스에 넣어준다
   const user = new User(req.body); // parser 가 있기 때문,
@@ -40,7 +41,7 @@ app.post('/register', (req, res) => {
   });
 });
 
-app.post('/login', (req, res) => {
+app.post('/api/users/login', (req, res) => {
   // 요청한 이메일이 데이터베이스에 있는지 찬는다
   User.findOne({ email: req.body.email }, (err, user) => {
     if (!user) {
@@ -71,6 +72,18 @@ app.post('/login', (req, res) => {
         });
       });
     });
+  });
+});
+
+app.get('/api/users/auth', auth, (req, res) => {
+  // 여기까지 미들웨어를 통과했다는 의미는 Authentication 이 true
+  res.status(200).json({
+    _id: req.user._id, // auth 에서 req 에 넣어줫기 때문
+    isAdmin: req.user.role === 0 ? false : true,
+    isAuth: true,
+    email: req.user.email,
+    name: req.user.name,
+    lastname: req.user.lastname,
   });
 });
 
