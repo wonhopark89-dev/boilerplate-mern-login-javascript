@@ -1,9 +1,10 @@
 import React from 'react';
-import axios from 'axios';
+import Axios from 'axios';
+import { withRouter } from 'react-router-dom'; // history 사용을 위해, history가 react dom 을 이용하기 때문
 
 function LandingPage(props) {
   const onClickHandler = () => {
-    axios.get('/api/users/logout').then((response) => {
+    Axios.get('/api/users/logout').then((response) => {
       console.log(response.data);
       if (response.data.success) {
         props.history.push('/login');
@@ -30,4 +31,4 @@ function LandingPage(props) {
   );
 }
 
-export default LandingPage;
+export default withRouter(LandingPage);
